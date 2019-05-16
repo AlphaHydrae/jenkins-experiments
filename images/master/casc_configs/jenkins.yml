@@ -1,0 +1,16 @@
+jobs:
+  - script: >
+
+      folder('test-folder') {
+        description('Test folder')
+      }
+
+      pipelineJob('test-folder/test-job') {
+        definition {
+          cpsScm {
+            scm {
+              git('https://github.com/AlphaHydrae/jenkins-experiments.git')
+            }
+          }
+        }
+      }

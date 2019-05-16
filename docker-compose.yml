@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+
+  master:
+    image: jenkins-experiments/master
+    build:
+      context: images/master
+    environment:
+      CASC_JENKINS_CONFIG: /etc/jenkins/casc_configs
+    ports:
+      - "7000:8080"
+    restart: "always"
+    volumes:
+      - "./images/master/casc_configs:/etc/jenkins/casc_configs"
+      - "master_data:/var/jenkins_home"
+
+volumes:
+  master_data:
