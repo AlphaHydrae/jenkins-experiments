@@ -8,16 +8,17 @@ Fully automate a Jenkins installation with:
 
 ## Requirements
 
-* [Docker](https://www.docker.com/) (tested with 18.09.2)
-* [Docker Compose](https://docs.docker.com/compose/) (tested with 1.23.2)
+* [Vagrant](https://www.vagrantup.com)
+* [VirtualBox](https://www.virtualbox.org) (or another Vagrant VM provider)
+* [Ansible](https://www.ansible.com/)
 
 ## Usage
 
 ```
-docker-compose up --build -d
+vagrant up
 ```
 
-Visit http://localhost:7000 in your browser
+Visit http://localhost:7000 in your browser.
 
 ## Documentation
 
