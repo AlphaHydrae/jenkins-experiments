@@ -1,3 +1,23 @@
+jenkins:
+
+  authorizationStrategy:
+    roleBased:
+      roles:
+        global:
+          - name: "admin"
+            description: "Jenkins administrators"
+            permissions:
+              - "Overall/Administer"
+            assignments:
+              - "admin"
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "letmein"
+
 jobs:
   - script: >
 
@@ -15,7 +35,16 @@ jobs:
         }
       }
 
+security:
+  remotingCLI:
+    enabled: false
+
 unclassified:
+
   gitscm:
     globalConfigName: Jenkins
     globalConfigEmail: jenkins@domain.local
+
+  location:
+    adminAddress: jenkins@domain.local
+    url: http://localhost:7000/

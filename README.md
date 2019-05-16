@@ -18,3 +18,8 @@ docker-compose up --build -d
 ```
 
 Visit http://localhost:7000 in your browser
+
+## Documentation
+
+* [Configuration as Code Plugin Examples](https://github.com/jenkinsci/configuration-as-code-plugin/tree/master/demos)
+* [Job DSL Plugin API](https://jenkinsci.github.io/job-dsl-plugin/)
