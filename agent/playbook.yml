@@ -1,0 +1,78 @@
+---
+- hosts: all
+  become: true
+  gather_facts: no # see tasks/ubuntu-setup.yml
+
+  vars:
+    docker_version: "5:18.09.6~3-0~ubuntu-bionic"
+    docker_compose_version: 1.24.0
+    master_ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAEAQCY3WK67vMspVx3GVALMS7PzAOTM00ruZKIELXWSVThK1y1spb7LCzMvCapu+WE5pYKczR6THj8XknxM7s/pqaFTaSUK5p1O4dGFRlGcARaUaRx2uemRNyHoJ60SdNRzmE4WDj12aMZC2DhVDqLSOmTEF5BF7F656BQT0BSWmwtNNN/o4M/LP7gtLldhmpvPa6HA5waLs/t9cmsp9bmJsHD1OGHSQhDJMB3NCz8i3bgT5xlTuxfdYvMi6FviYYaKqhiDUFz7V/K3Z0HlR7egylpG2ppVQg/CA7+CpMDZEq58UfFEpcOvo5H+F0A6gisCGaqyobVZKhZ5dn34hS6coqm6dNLUf0625k7Kz28anLlHRrUhFeuI9R8J19u6JFmCs1u+Bh+W0LtIVnlXnMXc788PWX4e39tSBu27dsHdZpKO5tGTzVBpE22+UC2HjiWRZMHmOYOLv6pWH6R1zHK5AzcXyLuRqWONdUicpLFnIqg5hx+wqNx1gjrk78JR7zh46HeFId0QFLzVoaEXUqScOyxoCvj86BQEl6EYR8lqbVqaDrpe4WCBX7Dd6Y/qaECRT9k0VnQWF9RQ5JD448GjA6MQ0LcLrqyHokv589CtV+/yWNRVtSR9RzCtSxW1x4hWEHaJh4NE52QTZqkEjtcR1/IRk6483OKyc+bO67oUZvS55vO9LQ3IuvgYppMQfreF3cubJLHA/TdSCmfKeycVLHqwgzM9TS3rqoBAhj3cUcO+vSANN7B6okfS0apVgM4L4QKQi6rgNbVonG8vvP/aEXM2v0IbqdzIR19uy1qygyP+HmYI0bMIVBHqr1v3+rPvqZVyIr8gaILhc2memcMxweLxuGph7bMZmK9PdZMG7IeLVz7/vPOElf2OnCGjNaqzazON4TqUkchYXcEXyKVPH85QFA6GP7YHzUEHwwNwsGeJovPcNTquwInq0gbhIa4hh7o+rIs0QNEOdPPDscOD80bJdaHSsObIs64p6dBwiYiyYUaFWcG5NhGchnophO9hobIPVnmNd0xReFWJKV1QjSQcqEDd2VG0Dbfp9mNhPgEVJOh2TUMcX+e7WU4VVvmWIBklDJTpmXQzERLq5MApPUZB/dS6J6+MR9+BSRMkt+kzfbZ81tizqdMPfxXwMn4wXhdCm0BpZq+M9CbwcnlS2ek18g5HhlgM6aG46AjJENDtUYXi28FdW158eAHOiQpkntmlO7GvYQeS4PeCfh/DqGQm4pSu/gaDM3Gd0uM8tR2IoAEs54RqJ8no/8Uv3PaWPbr1w9GsgRCteZTRejLnw5jUPHTJ8fOTNTZtCRhK3XKYj5rSQJovswfDtpLa7/Z5xXfhatnEXpnJcxqGWOLQM8x jenkins@domain.local"
+
+  pre_tasks:
+
+    # Make sure python 2 is installed before doing anything
+    # (this is not the case by default on the latest versions of Ubuntu)
+    - name: Install Python
+      raw: command -v python || { apt-get update && apt-get install -y python; }
+      changed_when: false
+      tags: [ always, install ]
+
+    # Gather ansible facts (requires python)
+    # (facts are required for many Ansible modules to work correctly)
+    - name: Gather facts
+      setup:
+      tags: [ always ]
+
+  roles:
+
+    - role: docker-compose
+      tags: [ install ]
+
+  tasks:
+
+    - name: Create jenkins user
+      user:
+        name: jenkins
+
+    - name: Ensure jenkins SSH directory
+      file:
+        path: /home/jenkins/.ssh
+        owner: jenkins
+        group: jenkins
+        mode: 0700
+        state: directory
+
+    - name: Authorize master access
+      lineinfile:
+        path: /home/jenkins/.ssh/authorized_keys
+        regexp: "jenkins@domain.local"
+        line: "{{ master_ssh_public_key }}"
+        create: true
+        owner: jenkins
+        group: jenkins
+        mode: 0600
+
+    - name: Create agent script directory
+      file:
+        path: /home/jenkins/bin
+        owner: jenkins
+        group: jenkins
+        mode: 750
+        state: directory
+
+    - name: Copy agent script
+      copy:
+        src: run-jenkins-agent.sh
+        dest: /home/jenkins/bin/run-jenkins-agent.sh
+        owner: jenkins
+        group: jenkins
+        mode: 750
+
+    - name: Allow jenkins user to run the agent script with passwordless sudo
+      copy:
+        src: sudoers
+        dest: /etc/sudoers.d/jenkins-agent
+
+    - name: Pull jenkins/slave image
+      docker_image:
+        name: jenkins/slave:3.29-1-alpine

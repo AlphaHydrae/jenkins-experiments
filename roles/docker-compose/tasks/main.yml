@@ -1,0 +1,58 @@
+---
+
+- name: Install packages to use APT over HTTPS
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+    state: present
+  tags: [ docker-compose ]
+
+- name: Install Python
+  apt:
+    name: python
+    state: present
+  tags: [ docker-compose ]
+
+- name: Install pip
+  apt:
+    name: python-pip
+    state: present
+  tags: [ docker-compose ]
+
+- name: Add Docker apt key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  tags: [ docker-compose ]
+
+- name: Add Docker apt repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+  tags: [ docker-compose ]
+
+- name: Install Docker
+  apt:
+    name: docker-ce={{ docker_version }}
+    update_cache: yes
+    state: present
+  tags: [ docker-compose ]
+
+- name: Install docker-py
+  pip:
+    name: docker-py
+  tags: [ docker-compose ]
+
+- name: Install Docker Compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-{{ ansible_architecture }}
+    dest: /usr/local/bin/docker-compose
+    force: true
+    owner: root
+    group: root
+    mode: 0755
+  tags: [ docker-compose ]

@@ -1,0 +1,76 @@
+---
+- hosts: all
+  become: true
+  gather_facts: no # see tasks/ubuntu-setup.yml
+
+  vars:
+    docker_version: "5:18.09.6~3-0~ubuntu-bionic"
+    docker_compose_version: 1.24.0
+
+  pre_tasks:
+
+    # Make sure python 2 is installed before doing anything
+    # (this is not the case by default on the latest versions of Ubuntu)
+    - name: Install Python
+      raw: command -v python || { apt-get update && apt-get install -y python; }
+      changed_when: false
+      tags: [ always, install ]
+
+    # Gather ansible facts (requires python)
+    # (facts are required for many Ansible modules to work correctly)
+    - name: Gather facts
+      setup:
+      tags: [ always ]
+
+  roles:
+
+    - role: docker-compose
+      tags: [ install ]
+
+  tasks:
+
+    - name: Copy SSH key pair
+      copy:
+        src: "{{ item }}"
+        dest: "/root/.ssh/{{ item }}"
+        mode: "400"
+      with_items:
+        - id_rsa
+        - id_rsa.pub
+
+    - name: Create directories
+      file:
+        path: "{{ item.path }}"
+        owner: "{{ item.owner | default(omit) }}"
+        group: "{{ item.group | default(omit) }}"
+        mode: "{{ item.mode | default('755') }}"
+        state: directory
+      with_items:
+        - path: /srv
+          mode: 755
+        - path: /srv/jenkins
+          mode: 700
+        - path: /srv/jenkins/casc_configs
+          mode: 755
+
+    - name: Copy configuration files
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest | default('/srv/jenkins/' + item.src) }}"
+        owner: "{{ item.owner | default(omit) }}"
+        group: "{{ item.group | default(omit) }}"
+        mode: "{{ item.mode | default('644') }}"
+      with_items:
+        - src: casc_configs/jenkins.yml
+        - src: .gitconfig
+        - src: docker-compose.yml
+        - src: Dockerfile
+        - src: id_rsa
+        - src: plugins.txt
+        - src: run-jenkins-agent.sh
+          mode: "755"
+
+    - name: Run Jenkins master
+      command: docker-compose up --build -d
+      args:
+        chdir: /srv/jenkins
