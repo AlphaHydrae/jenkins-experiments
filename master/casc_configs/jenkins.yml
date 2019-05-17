@@ -88,6 +88,9 @@ jobs:
             }
           }
         }
+        parameters {
+          booleanParam('RUN_TESTS', false, 'check to enable tests')
+        }
       }
 
 security:
