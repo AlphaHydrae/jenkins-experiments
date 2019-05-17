@@ -73,6 +73,7 @@
         src: sudoers
         dest: /etc/sudoers.d/jenkins-agent
 
-    - name: Pull jenkins/slave image
-      docker_image:
-        name: jenkins/slave:3.29-1-alpine
+    - name: Build Jenkins agent image
+      command: docker build -t jenkins-experiments/agent .
+      args:
+        chdir: /vagrant/agent
