@@ -4,19 +4,35 @@ jenkins:
     roleBased:
       roles:
         global:
-          - name: "admin"
-            description: "Jenkins administrators"
+          - name: admin
+            description: Jenkins administrators
             permissions:
-              - "Overall/Administer"
+              - Overall/Administer
             assignments:
-              - "admin"
+              - admin
+
+  crumbIssuer: standard
+
+  nodes:
+    - permanent:
+        labelString: Agent
+        mode: NORMAL
+        name: agent
+        numExecutors: 2
+        remoteFS: /home/jenkins/data
+        launcher:
+          command:
+            command: ssh -i /etc/jenkins/id_rsa jenkins@192.168.50.31 /usr/bin/sudo /home/jenkins/bin/run-jenkins-agent.sh
+
+  remotingSecurity:
+    enabled: true
 
   securityRealm:
     local:
       allowsSignup: false
       users:
-        - id: "admin"
-          password: "letmein"
+        - id: admin
+          password: letmein
 
 jobs:
   - script: >
@@ -36,6 +52,8 @@ jobs:
       }
 
 security:
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: false
   remotingCLI:
     enabled: false
 

@@ -18,7 +18,7 @@ Vagrant.configure('2') do |config|
       vb.memory = 2048
     end
 
-    config.vm.provision 'ansible' do |ansible|
+    master_config.vm.provision 'ansible' do |ansible|
       ansible.playbook = 'master/playbook.yml'
       ansible.compatibility_mode = '2.0'
       ansible.verbose = '-vv'
@@ -38,7 +38,7 @@ Vagrant.configure('2') do |config|
       vb.memory = 1024
     end
 
-    config.vm.provision 'ansible' do |ansible|
+    agent_config.vm.provision 'ansible' do |ansible|
       ansible.playbook = 'agent/playbook.yml'
       ansible.compatibility_mode = '2.0'
       ansible.verbose = '-vv'

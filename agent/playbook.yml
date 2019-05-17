@@ -57,7 +57,7 @@
         path: /home/jenkins/bin
         owner: jenkins
         group: jenkins
-        mode: 750
+        mode: 0750
         state: directory
 
     - name: Copy agent script
@@ -66,7 +66,7 @@
         dest: /home/jenkins/bin/run-jenkins-agent.sh
         owner: jenkins
         group: jenkins
-        mode: 750
+        mode: 0750
 
     - name: Allow jenkins user to run the agent script with passwordless sudo
       copy:

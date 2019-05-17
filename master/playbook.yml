@@ -29,14 +29,11 @@
 
   tasks:
 
-    - name: Copy SSH key pair
+    - name: Copy SSH private key
       copy:
-        src: "{{ item }}"
-        dest: "/root/.ssh/{{ item }}"
+        src: id_rsa
+        dest: "/root/.ssh/id_rsa"
         mode: "400"
-      with_items:
-        - id_rsa
-        - id_rsa.pub
 
     - name: Create directories
       file:
@@ -72,5 +69,10 @@
 
     - name: Run Jenkins master
       command: docker-compose up --build -d
+      args:
+        chdir: /srv/jenkins
+
+    - name: Add agent to SSH known hosts
+      command: docker-compose exec master ssh -i /etc/jenkins/id_rsa -o "StrictHostKeyChecking no" jenkins@192.168.50.31 true
       args:
         chdir: /srv/jenkins

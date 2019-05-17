@@ -11,6 +11,7 @@ Fully automate a Jenkins installation with:
 * [Vagrant](https://www.vagrantup.com)
 * [VirtualBox](https://www.virtualbox.org) (or another Vagrant VM provider)
 * [Ansible](https://www.ansible.com/)
+* 3072 MB of free RAM (2048 MB for the Jenkins master VM, 1024 MB for the Jenkins agent VM)
 
 ## Usage
 
