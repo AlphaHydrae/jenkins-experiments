@@ -1,0 +1,1 @@
+%jenkins ALL=(ALL:ALL) NOPASSWD: /usr/local/bin/run-jenkins-agent.sh

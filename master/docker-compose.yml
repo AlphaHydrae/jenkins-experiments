@@ -12,8 +12,8 @@ services:
       - "7000:8080"
     restart: "always"
     volumes:
-      - "./casc_configs:/etc/jenkins/casc_configs"
       - "master_data:/var/jenkins_home"
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
 volumes:
   master_data:

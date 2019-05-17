@@ -16,7 +16,7 @@ Fully automate a Jenkins installation with:
 ## Usage
 
 ```
-vagrant up
+vagrant up agent && vagrant up master
 ```
 
 Visit http://localhost:7000 in your browser.

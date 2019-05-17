@@ -15,9 +15,14 @@ jenkins:
 
   nodes:
     - permanent:
-        labelString: Agent
-        mode: NORMAL
-        name: agent
+        labelString: Master
+        launcher:
+          command:
+            command: /usr/bin/sudo /usr/local/bin/run-jenkins-agent.sh
+        mode: EXCLUSIVE
+        name: master-agent
+        nodeDescription: This is the agent running on the master VM.
+        nodeName: master-agent
         nodeProperties:
           - envVars:
               env:
@@ -30,10 +35,33 @@ jenkins:
                 - key: GIT_COMMITTER_EMAIL
                   value: jenkins@domain.local
         numExecutors: 2
-        remoteFS: /home/jenkins/data
+        remoteFS: /home/jenkins/agent
+        retentionStrategy: always
+    - permanent:
+        labelString: Agent
         launcher:
           command:
             command: ssh -i /etc/jenkins/id_rsa jenkins@192.168.50.31 /usr/bin/sudo /home/jenkins/bin/run-jenkins-agent.sh
+        mode: EXCLUSIVE
+        name: agent
+        nodeDescription: This is the agent running on the agent VM.
+        nodeName: agent
+        nodeProperties:
+          - envVars:
+              env:
+                - key: GIT_AUTHOR_NAME
+                  value: Jenkins
+                - key: GIT_AUTHOR_EMAIL
+                  value: jenkins@domain.local
+                - key: GIT_COMMITTER_NAME
+                  value: Jenkins
+                - key: GIT_COMMITTER_EMAIL
+                  value: jenkins@domain.local
+        numExecutors: 2
+        remoteFS: /home/jenkins/agent
+        retentionStrategy: always
+
+  numExecutors: 0
 
   remotingSecurity:
     enabled: true

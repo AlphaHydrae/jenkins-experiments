@@ -66,6 +66,7 @@
         - src: plugins.txt
         - src: run-jenkins-agent.sh
           mode: "755"
+        - src: sudoers
 
     - name: Run Jenkins master
       command: docker-compose up --build -d
@@ -76,3 +77,8 @@
       command: docker-compose exec master ssh -i /etc/jenkins/id_rsa -o "StrictHostKeyChecking no" jenkins@192.168.50.31 true
       args:
         chdir: /srv/jenkins
+
+    - name: Build Jenkins agent image
+      command: docker build -t jenkins-experiments/agent .
+      args:
+        chdir: /vagrant/agent
